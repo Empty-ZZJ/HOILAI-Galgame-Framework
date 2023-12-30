@@ -10,7 +10,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.UI;
 using static ScenesScripts.GalPlot.GalManager.Struct_PlotData;
-
 namespace ScenesScripts.GalPlot
 {
     public class GalManager : MonoBehaviour
@@ -49,6 +48,7 @@ namespace ScenesScripts.GalPlot
         /// 存储整个剧本的XML文档
         /// </summary>
         private XDocument PlotxDoc;
+        [Serializable]
         public class Struct_PlotData
         {
             public string Title;
@@ -110,6 +110,7 @@ namespace ScenesScripts.GalPlot
         public IEnumerator LoadPlot ()
         {
             yield return null;
+
             string _PlotText = string.Empty;
             string filePath = Path.Combine(Application.streamingAssetsPath, "HGF/Test.xml");
             if (Application.platform == RuntimePlatform.Android)
@@ -181,6 +182,7 @@ namespace ScenesScripts.GalPlot
                     GameAPI.Print(ex.Message, "error");
                 }
             }
+            GameAPI.Print(Newtonsoft.Json.JsonConvert.SerializeObject(PlotData));
             Button_Click_NextPlot();
         }
         /// <summary>
@@ -279,6 +281,17 @@ namespace ScenesScripts.GalPlot
                 case "DeleteCharacter":
                 {
                     DestroyCharacterByID(PlotData.NowPlotDataNode.Attribute("CharacterID").Value);
+                    break;
+                }
+                case "ExitGame":
+                {
+                    foreach (var item in PlotData.CharacterInfo)
+                    {
+                        DestroyCharacterByID(item.CharacterID);
+                    }
+                    PlotData.MainPlot.Clear();
+                    PlotData.BranchPlot.Clear();
+                    PlotData.IsBranch = false;
                     break;
                 }
             }
