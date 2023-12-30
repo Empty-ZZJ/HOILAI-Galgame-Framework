@@ -1,5 +1,5 @@
 # HOILAI Galgame Framework（HGF）文档
-#### HGF是由花濑研发的，基于GPL协议的Unity Galgame开源框架。
+#### HGF是由花濑研发的，基于Apache协议的Unity Galgame开源框架。
 相对于其他框架，HGF主要有以下优点：
 
 - 纯文本编写：不依赖于任何文本编辑器，记事本可写。
