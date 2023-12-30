@@ -1,5 +1,7 @@
 # HOILAI Galgame Framework（HGF）文档
 #### HGF是由花濑研发的，基于Apache协议的Unity Galgame开源框架。
+HGF文档地址：[HGF文档地址](https://doc.hoilai.com/project-3/ "HGF文档")
+
 相对于其他框架，HGF主要有以下优点：
 
 - 纯文本编写：不依赖于任何文本编辑器，记事本可写。
@@ -8,3 +10,9 @@
 - 功能强大：支持嵌套剧情，分支情等等。
 - 动画支持：支持常见的角色动画，如抖动，滑动等等。
 - 可自定义程度高：源码注释丰富，二次开发相对容易。
+
+赞助我们：
+微信：
+![mm_reward_qrcode_1689339052464](https://cdn.img.nanasekurumi.top/i/2023/12/30/5552955350275069658.webp)
+支付宝：
+![apay](https://cdn.img.nanasekurumi.top/i/2023/12/30/5552955347754291708.webp)
