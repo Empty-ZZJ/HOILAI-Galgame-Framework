@@ -2,6 +2,7 @@ using Common.Game;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using TetraCreations.Attributes;
@@ -39,8 +40,8 @@ namespace ScenesScripts.GalPlot
         public int CharacterNum;
         private class CharacterConfig
         {
-            public static GameConfig CharacterInfo = new($"{GameAPI.GetWritePath()}/Config/CharacterInfo.ini");
-            public static GameConfig Department = new($"{GameAPI.GetWritePath()}/Config/Department.ini");
+            public static GameConfig CharacterInfo = new($"{GameAPI.GetWritePath()}/HGF/CharacterInfo.ini");
+            public static GameConfig Department = new($"{GameAPI.GetWritePath()}/HGF/Department.ini");
 
         }
 
@@ -109,10 +110,26 @@ namespace ScenesScripts.GalPlot
         public IEnumerator LoadPlot ()
         {
             yield return null;
+            string _PlotText = string.Empty;
+            string filePath = Path.Combine(Application.streamingAssetsPath, "HGF/Test.xml");
+            if (Application.platform == RuntimePlatform.Android)
+            {
+                filePath = "jar:file://" + Application.dataPath + "!/assets/HGF/Test.xml";
+            }
+            UnityWebRequest www = UnityWebRequest.Get(filePath);
+            yield return www.SendWebRequest();
+
+            if (www.result == UnityWebRequest.Result.Success)
+            {
+                _PlotText = www.downloadHandler.text;
+            }
+            else
+            {
+                Debug.Log("Error: " + www.error);
+            }
             try
             {
 
-                var _PlotText = Resources.Load<TextAsset>("TextAsset/Plots/Test").text;
                 GameAPI.Print($"游戏剧本：{_PlotText}");
                 PlotxDoc = XDocument.Parse(_PlotText);
 
@@ -208,13 +225,12 @@ namespace ScenesScripts.GalPlot
                     _.CharacterID = _CharacterId;
                     _.Affiliation = CharacterConfig.Department.GetValue(CharacterConfig.CharacterInfo.GetValue(_From, "Department"), "Name");
 
-                    var _CameObj = Resources.Load<GameObject>("Common/Gameobject/Galgame/Img-Character");
-                    _CameObj.GetComponent<Image>().sprite = GameAPI.LoadTextureByIO($"{GameAPI.GetWritePath()}/static/Texture2D/Portrait/{CharacterConfig.CharacterInfo.GetValue(_From, "ResourcesPath")}/{CharacterConfig.CharacterInfo.GetValue(_From, "Portrait-Normall")}");
+                    var _CameObj = Resources.Load<GameObject>("HGF/Img-Character");
+                    _CameObj.GetComponent<Image>().sprite = GameAPI.LoadTextureByIO($"{GameAPI.GetWritePath()}/HGF/Texture2D/Portrait/{CharacterConfig.CharacterInfo.GetValue(_From, "ResourcesPath")}/{CharacterConfig.CharacterInfo.GetValue(_From, "Portrait-Normall")}");
                     _.CharacterGameObject = Instantiate(_CameObj, Gal_CharacterImg.gameObject.transform);
 
                     if (PlotData.NowPlotDataNode.Attributes("SendMessage").Count() != 0)
                     {
-
                         _.CharacterGameObject.GetComponent<GalManager_CharacterAnimate>().Animate_StartOrOutside = PlotData.NowPlotDataNode.Attribute("SendMessage").Value;
                     }
 
@@ -311,7 +327,7 @@ namespace ScenesScripts.GalPlot
         {
             //获取.wav文件，并转成AudioClip
             GameAPI.Print($"{GameAPI.GetWritePath()}/{fileName}");
-            UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip($"{GameAPI.GetWritePath()}/static/Audio/Plot/{fileName}", AudioType.MPEG);
+            UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip($"{GameAPI.GetWritePath()}/HGF/Audio/Plot/{fileName}", AudioType.MPEG);
             //等待转换完成
             yield return www.SendWebRequest();
             //获取AudioClip
