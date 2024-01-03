@@ -133,7 +133,6 @@ namespace ScenesScripts.GalPlot
             {
                 CharacterImg.DOFade(1, 0.7f);
             }
-
         }
         /// <summary>
         /// 设置image的位置到屏幕之外
@@ -149,7 +148,6 @@ namespace ScenesScripts.GalPlot
                     this.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2((-MainCanvas.GetComponent<RectTransform>().sizeDelta.x / 2) - (ImageGameObject.gameObject.GetComponent<Image>().sprite.texture.width / 2), ImageGameObject.anchoredPosition.y);
                     break;
                 case 1:
-
                     this.gameObject.GetComponent<RectTransform>().anchoredPosition = new Vector2((MainCanvas.GetComponent<RectTransform>().sizeDelta.x / 2) + (ImageGameObject.gameObject.GetComponent<Image>().sprite.texture.width / 2), ImageGameObject.anchoredPosition.y);
                     break;
                 case 0:

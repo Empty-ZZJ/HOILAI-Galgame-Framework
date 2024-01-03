@@ -245,7 +245,7 @@ namespace ScenesScripts.GalPlot
                         foreach (var ClildItem in PlotData.NowPlotDataNode.Elements())
                         {
                             if (ClildItem.Name.ToString() == "Choice")
-                                PlotData.ChoiceText.Add(new Struct_Choice { Title = ClildItem.Value, JumpID = ClildItem.Attribute("JumpID").Value };);
+                                PlotData.ChoiceText.Add(new Struct_Choice { Title = ClildItem.Value, JumpID = ClildItem.Attribute("JumpID").Value });
 
                         }
                         Gal_Text.StartTextContent(PlotData.NowPlotDataNode.Attribute("Content").Value, _nodeinfo.Name, _nodeinfo.Affiliation, () =>

@@ -7,8 +7,8 @@ namespace ScenesScripts.GalPlot
 {
     public class GalManager_Text : MonoBehaviour
     {
-        public const float DefalutSpeed = 0.045f;
-        public const float FastSpeend = 0.02f;
+        public const float DefaultSpeed = 0.045f;
+        public const float FastSpeed = 0.02f;
         /// <summary>
         /// 当前是否剧情加速
         /// </summary>
@@ -81,7 +81,7 @@ namespace ScenesScripts.GalPlot
         public Tweener StartTextContent (string TextContent, string CharacterName, string CharacterIdentity, UnityAction CallBack = null)
         {
             //100  60   40
-            void Alwayls ()
+            void Always_Temp ()
             {
 
                 SetText_CharacterName(CharacterName, CharacterIdentity);
@@ -94,15 +94,15 @@ namespace ScenesScripts.GalPlot
                 IsSpeak = false;
                 TextAnimateEvemt.Kill();
                 Button_Next.SetActive(true);
-                Alwayls();
+                Always_Temp();
                 return TextAnimateEvemt;
             }
             else if (IsSpeak) return TextAnimateEvemt;
             IsSpeak = true;
             SetText_Content(string.Empty);//先清空内容
             Button_Next.SetActive(false);
-            Alwayls();
-            TextAnimateEvemt = Text_TextContent.DOText(TextContent, TextContent.Length * (IsFastMode ? FastSpeend : DefalutSpeed)).SetEase(Ease.Linear).OnComplete(() =>
+            Always_Temp();
+            TextAnimateEvemt = Text_TextContent.DOText(TextContent, TextContent.Length * (IsFastMode ? FastSpeed : DefaultSpeed)).SetEase(Ease.Linear).OnComplete(() =>
             {
 
                 IsSpeak = false;
