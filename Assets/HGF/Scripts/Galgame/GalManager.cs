@@ -269,7 +269,7 @@ namespace ScenesScripts.GalPlot
                 case "ChangeBackImg"://更换背景图片
                 {
                     var _Path = PlotData.NowPlotDataNode.Attribute("Path").Value;
-                    Gal_BackImg.SetImage(GameAPI.LoadTextureByIO(_Path));
+                    Gal_BackImg.SetImage(GameAPI.LoadTextureByIO($"{GameAPI.GetWritePath()}/HGF/Texture2D/Back/{_Path}"));
                     Button_Click_NextPlot();
                     break;
                 }
