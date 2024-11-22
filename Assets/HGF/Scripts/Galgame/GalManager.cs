@@ -14,6 +14,8 @@ namespace ScenesScripts.GalPlot
 {
     public class GalManager : MonoBehaviour
     {
+        public static string PlotID;
+
         [Title("当前对话")]
         ///
         public GalManager_Text Gal_Text;
@@ -27,10 +29,6 @@ namespace ScenesScripts.GalPlot
         [Title("控制背景图片的组件")]
         public GalManager_BackImg Gal_BackImg;
 
-        /// <summary>
-        /// 角色发言的AudioSource
-        /// </summary>
-        private AudioSource Gal_Voice;
 
         /// <summary>
         /// 当前场景角色数量
@@ -43,7 +41,23 @@ namespace ScenesScripts.GalPlot
             public static GameConfig Department = new($"{GameAPI.GetWritePath()}/HGF/Department.ini");
 
         }
+        public class AudioSystemModel
+        {
+            public AudioSource Character_Voice;
+            public AudioSource BackMix;
+            public AudioSource TextMix;
+            public class AudioInfo
+            {
+                public string name;
+                public string path;
+            }
+            public List<AudioInfo> AudioList = new();
+            /// <summary>
+            /// 背景音乐Clip
+            /// </summary>
 
+        }
+        public static AudioSystemModel AudioSystem = new();
         /// <summary>
         /// 存储整个剧本的XML文档
         /// </summary>
@@ -67,6 +81,7 @@ namespace ScenesScripts.GalPlot
                 public GameObject CharacterGameObject;
                 public string Name;
                 public string Affiliation;
+                public string FromID;
             }
             public List<Struct_CharacterInfo> CharacterInfo = new();
             public List<Struct_Choice> ChoiceText = new();
@@ -82,12 +97,14 @@ namespace ScenesScripts.GalPlot
             public string NowJumpID;
 
         }
+
         public static Struct_PlotData PlotData = new();
         private void Start ()
         {
-            Gal_Voice = this.gameObject.GetComponent<AudioSource>();
             ResetPlotData();
+            StartBackAudio();
             StartCoroutine(LoadPlot());
+
             return;
         }
         /// <summary>
@@ -135,6 +152,11 @@ namespace ScenesScripts.GalPlot
                 {
                     switch (item.Name.ToString())
                     {
+                        case "ID":
+                        {
+                            PlotID = item.Value;
+                            break;
+                        }
                         case "title":
                         {
                             PlotData.Title = item.Value;
@@ -150,6 +172,19 @@ namespace ScenesScripts.GalPlot
                             foreach (var BranchItem in item.Elements())
                             {
                                 PlotData.BranchPlot.Add(BranchItem);
+                            }
+                            break;
+                        }
+                        case "AudioList":
+                        {
+                            foreach (var item_name in item.Elements())
+                            {
+
+                                AudioSystem.AudioList.Add(new AudioSystemModel.AudioInfo
+                                {
+                                    name = item_name.Value,
+                                    path = item_name.Attribute("Path").Value,
+                                });
                             }
                             break;
                         }
@@ -221,7 +256,7 @@ namespace ScenesScripts.GalPlot
                     _.Name = CharacterConfig.CharacterInfo.GetValue(_From, "Name");
                     _.CharacterID = _CharacterId;
                     _.Affiliation = CharacterConfig.Department.GetValue(CharacterConfig.CharacterInfo.GetValue(_From, "Department"), "Name");
-
+                    _.FromID = _From;
                     var _CameObj = Resources.Load<GameObject>("HGF/Img-Character");
                     _CameObj.GetComponent<Image>().sprite = GameAPI.LoadTextureByIO($"{GameAPI.GetWritePath()}/HGF/Texture2D/Portrait/{CharacterConfig.CharacterInfo.GetValue(_From, "ResourcesPath")}/{CharacterConfig.CharacterInfo.GetValue(_From, "Portrait-Normall")}");
                     _.CharacterGameObject = Instantiate(_CameObj, Gal_CharacterImg.gameObject.transform);
@@ -263,7 +298,7 @@ namespace ScenesScripts.GalPlot
                     if (PlotData.NowPlotDataNode.Attributes("SendMessage").Count() != 0)
                         SendCharMessage(_nodeinfo.CharacterID, PlotData.NowPlotDataNode.Attribute("SendMessage").Value);
                     if (PlotData.NowPlotDataNode.Attributes("AudioPath").Count() != 0)
-                        StartCoroutine(PlayAudio(Gal_Voice, PlotData.NowPlotDataNode.Attribute("AudioPath").Value));
+                        StartCoroutine(PlayAudio(AudioSystem.Character_Voice, PlotData.NowPlotDataNode.Attribute("AudioPath").Value));
                     break;
                 }
                 case "ChangeBackImg"://更换背景图片
@@ -276,6 +311,26 @@ namespace ScenesScripts.GalPlot
                 case "DeleteCharacter":
                 {
                     DestroyCharacterByID(PlotData.NowPlotDataNode.Attribute("CharacterID").Value);
+                    break;
+                }
+                case "ChangeCharacterImg":
+                {
+                    var _CharacterID = PlotData.NowPlotDataNode.Attribute("CharacterID").Value;
+                    var _obj = GetCharacterObjectByName(_CharacterID);
+
+                    //Debug.Log(_obj.CharacterGameObject.GetComponent<Image>() is null);
+
+                    //ResourcesPath
+                    _obj.CharacterGameObject.GetComponent<GalManager_CharacterImg>().SetImage(GameAPI.LoadTextureByIO($"{GameAPI.GetWritePath()}/HGF/Texture2D/Portrait/{CharacterConfig.CharacterInfo.GetValue(_obj.FromID, "ResourcesPath")}/{CharacterConfig.CharacterInfo.GetValue(_obj.FromID, PlotData.NowPlotDataNode.Attribute("KeyName").Value)}"));
+                    // _obj.CharacterGameObject.GetComponent<Image>().sprite = Resources.Load<Sprite>($"Texture2D/Menhera/Plot/character/{GameManager.ServerManager.Config.CharacterInfo.GetValue(_obj.FromID, "ResourcePath")}/{GameManager.ServerManager.Config.CharacterInfo.GetValue(_obj.FromID, PlotData.NowPlotDataNode.Attribute("Img").Value)}");
+                    // Debug.Log($"Texture2D/Menhera/Plot/character/{GameManager.ServerManager.Config.CharacterInfo.GetValue(_obj.FromID, "ResourcePath")}/{GameManager.ServerManager.Config.CharacterInfo.GetValue(_obj.FromID, PlotData.NowPlotDataNode.Attribute("Img").Value)}");
+                    Button_Click_NextPlot();
+                    break;
+                }
+                case "ChangeBackAudio":
+                {
+                    PlayAudio(AudioSystem.BackMix, AudioSystem.AudioList.Find(e => e.name == PlotData.NowPlotDataNode.Value).path);
+                    Button_Click_NextPlot();
                     break;
                 }
                 case "ExitGame":
@@ -335,7 +390,7 @@ namespace ScenesScripts.GalPlot
         {
             //获取.wav文件，并转成AudioClip
             GameAPI.Print($"{GameAPI.GetWritePath()}/{fileName}");
-            UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip($"{GameAPI.GetWritePath()}/HGF/Audio/Plot/{fileName}", AudioType.MPEG);
+            UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip($"{GameAPI.GetWritePath()}/HGF/Audio/Plot/{PlotID}/{fileName}", AudioType.MPEG);
             //等待转换完成
             yield return www.SendWebRequest();
             //获取AudioClip
@@ -345,6 +400,17 @@ namespace ScenesScripts.GalPlot
             //播放声音
             audioSource.Play();
         }
+        /// <summary>
+        /// 初始化音乐系统
+        /// </summary>
+        private void StartBackAudio ()
+        {
+            AudioSystem.Character_Voice = GameObject.Find("AudioSystem/Character_Voice").GetComponent<AudioSource>();
+            AudioSystem.BackMix = GameObject.Find("AudioSystem/BackMix").GetComponent<AudioSource>();
+            AudioSystem.TextMix = GameObject.Find("AudioSystem/TextMix").GetComponent<AudioSource>();
+
+        }
+
         private void FixedUpdate ()
         {
             CharacterNum = PlotData.CharacterInfo.Count;
