@@ -1,0 +1,24 @@
+{
+    "C1": {
+        "Name": "小爆妹",
+        "Age": 16,
+        "Department": "D1",
+        "Portraits": {
+            "Normall": "1",
+            "Photo": "2",
+            "Sing": "3",
+            "Grace": "4"
+        }
+    },
+    "C2": {
+        "Name": "测试角色",
+        "Age": 1,
+        "Department": "D1",
+        "Portraits": {
+            "Normall": "1",
+            "Photo": "2",
+            "Sing": "3",
+            "Grace": "4"
+        }
+    }
+}
